@@ -1,4 +1,11 @@
-import { AIModelName, AIProvider, TTSProvider, getModelName, getTtsModelName } from '../services/api';
+import {
+  AIModelName,
+  AIProvider,
+  TTSProvider,
+  getImageRecognitionModelName,
+  getModelName,
+  getTtsModelName,
+} from '../services/api';
 
 type UmamiTrack = (eventName: string, eventData?: Record<string, string>) => void;
 
@@ -38,7 +45,7 @@ interface AnalyticsEvent {
 export function getImageRecognitionUsage(provider: AIProvider, model?: AIModelName): ImageRecognitionUsage {
   return {
     provider,
-    model: getModelName(provider, model),
+    model: getImageRecognitionModelName(provider, model),
   };
 }
 

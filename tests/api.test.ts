@@ -1,9 +1,11 @@
 import assert from 'assert';
 import {
   DEFAULT_AI_PROVIDER,
+  DEEPSEEK_VISION_MODEL_NAME,
   DEEPSEEK_MODEL_OPTIONS,
   GEMINI_MODEL_OPTIONS,
   getApiEndpoint,
+  getImageRecognitionModelName,
   getModelName,
   getTtsModelName,
   getRequestProviderPayload,
@@ -128,22 +130,27 @@ assert.strictEqual(SERVER_DEFAULT_AI_PROVIDER, 'deepseek');
 assert.strictEqual(getModelName(), 'deepseek-v4-flash');
 assert.strictEqual(getTtsModelName('edge'), 'edge-tts');
 assert.strictEqual(getTtsModelName('gemini'), 'gemini-3.1-flash-tts-preview');
-assert.deepStrictEqual(GEMINI_MODEL_OPTIONS, ['gemini-3.6-flash', 'gemini-3.5-flash-lite']);
+assert.deepStrictEqual(GEMINI_MODEL_OPTIONS, ['gemini-3.7-flash', 'gemini-3.5-flash-lite']);
 assert.deepStrictEqual(DEEPSEEK_MODEL_OPTIONS, ['deepseek-v4-flash', 'deepseek-v4-pro']);
+assert.strictEqual(DEEPSEEK_VISION_MODEL_NAME, 'deepseek-v4-flash-vision-exp');
+assert.strictEqual(getImageRecognitionModelName('deepseek'), DEEPSEEK_VISION_MODEL_NAME);
+assert.strictEqual(getImageRecognitionModelName('deepseek', 'deepseek-v4-pro'), DEEPSEEK_VISION_MODEL_NAME);
+assert.strictEqual(getImageRecognitionModelName('gemini'), 'gemini-3.7-flash');
+assert.strictEqual(getImageRecognitionModelName('gemini', 'gemini-3.5-flash-lite'), 'gemini-3.5-flash-lite');
 assert.strictEqual(normalizeAIProvider('gemini'), 'gemini');
 assert.strictEqual(normalizeAIProvider('deepseek'), 'deepseek');
 assert.strictEqual(normalizeAIProvider('unknown'), 'deepseek');
 assert.strictEqual(normalizeAIModel('deepseek', 'deepseek-v4-pro'), 'deepseek-v4-pro');
 assert.strictEqual(normalizeAIModel('deepseek', 'unknown'), 'deepseek-v4-flash');
 assert.strictEqual(normalizeAIModel('gemini', 'gemini-3.5-flash-lite'), 'gemini-3.5-flash-lite');
-assert.strictEqual(normalizeAIModel('gemini', 'deepseek-v4-pro'), 'gemini-3.6-flash');
+assert.strictEqual(normalizeAIModel('gemini', 'deepseek-v4-pro'), 'gemini-3.7-flash');
 assert.strictEqual(normalizeServerAIProvider('gemini'), 'gemini');
 assert.strictEqual(normalizeServerAIProvider('deepseek'), 'deepseek');
 assert.strictEqual(normalizeServerAIProvider('unknown'), 'deepseek');
 assert.strictEqual(getModelName('deepseek'), 'deepseek-v4-flash');
 assert.strictEqual(getModelName('deepseek', 'deepseek-v4-pro'), 'deepseek-v4-pro');
 assert.strictEqual(getModelName('gemini', 'gemini-3.5-flash-lite'), 'gemini-3.5-flash-lite');
-assert.strictEqual(getModelName('gemini', 'deepseek-v4-pro'), 'gemini-3.6-flash');
+assert.strictEqual(getModelName('gemini', 'deepseek-v4-pro'), 'gemini-3.7-flash');
 
 const oldCode = process.env.CODE;
 try {
@@ -188,7 +195,7 @@ assert.deepStrictEqual(getAnalyzeUsageEvent('gemini'), {
   name: ANALYZE_USAGE_EVENT_NAME,
   data: {
     provider: 'gemini',
-    model: 'gemini-3.6-flash',
+    model: 'gemini-3.7-flash',
     image_recognition: 'false',
     image_provider: 'none',
     image_model: 'none',
@@ -244,10 +251,10 @@ assert.deepStrictEqual(getAnalyzeUsageEvent('gemini', {
   name: ANALYZE_USAGE_EVENT_NAME,
   data: {
     provider: 'gemini',
-    model: 'gemini-3.6-flash',
+    model: 'gemini-3.7-flash',
     image_recognition: 'true',
     image_provider: 'gemini',
-    image_model: 'gemini-3.6-flash',
+    image_model: 'gemini-3.7-flash',
     tts: 'true',
     tts_provider: 'gemini',
     tts_model: 'gemini-3.1-flash-tts-preview',
@@ -257,7 +264,14 @@ assert.deepStrictEqual(getImageRecognitionUsageEvent('gemini'), {
   name: IMAGE_RECOGNITION_USAGE_EVENT_NAME,
   data: {
     provider: 'gemini',
-    model: 'gemini-3.6-flash',
+    model: 'gemini-3.7-flash',
+  },
+});
+assert.deepStrictEqual(getImageRecognitionUsageEvent('deepseek'), {
+  name: IMAGE_RECOGNITION_USAGE_EVENT_NAME,
+  data: {
+    provider: 'deepseek',
+    model: 'deepseek-v4-flash-vision-exp',
   },
 });
 assert.deepStrictEqual(getTtsUsageEvent('edge'), {
@@ -358,7 +372,7 @@ assert.strictEqual(reconstructJapaneseChunks(smallTailChunks), smallTailArticle)
 
 assert.deepStrictEqual(getRequestProviderPayload('gemini'), {
   provider: 'gemini',
-  model: 'gemini-3.6-flash',
+  model: 'gemini-3.7-flash',
 });
 
 assert.deepStrictEqual(getRequestProviderPayload('gemini', 'gemini-3.5-flash-lite'), {
@@ -381,9 +395,9 @@ assert.deepStrictEqual(getRequestProviderPayload(), {
   model: 'deepseek-v4-flash',
 });
 
-assert.deepStrictEqual(withProviderControls('gemini', { model: 'gemini-3.6-flash' }), {
-  model: 'gemini-3.6-flash',
-  reasoning_effort: 'minimal',
+assert.deepStrictEqual(withProviderControls('gemini', { model: 'gemini-3.7-flash' }), {
+  model: 'gemini-3.7-flash',
+  reasoning_effort: 'low',
 });
 
 assert.deepStrictEqual(withProviderControls('gemini', { model: 'gemini-3.5-flash-lite' }), {
@@ -398,6 +412,13 @@ assert.deepStrictEqual(withProviderControls('deepseek', { model: 'deepseek-v4-fl
 
 assert.deepStrictEqual(withProviderControls('deepseek', { model: 'deepseek-v4-pro' }), {
   model: 'deepseek-v4-pro',
+  thinking: { type: 'disabled' },
+});
+
+assert.deepStrictEqual(withProviderControls('deepseek', { model: DEEPSEEK_VISION_MODEL_NAME }, {
+  enableThinking: false,
+}), {
+  model: 'deepseek-v4-flash-vision-exp',
   thinking: { type: 'disabled' },
 });
 
@@ -433,10 +454,10 @@ assert.deepStrictEqual(withProviderControls(
 
 const geminiStructuredPayload = withProviderControls(
   'gemini',
-  { model: 'gemini-3.6-flash' },
+  { model: 'gemini-3.7-flash' },
   { structuredOutput: 'analysisTokens' }
 );
-assert.strictEqual(geminiStructuredPayload.reasoning_effort, 'minimal');
+assert.strictEqual(geminiStructuredPayload.reasoning_effort, 'low');
 assert.deepStrictEqual(
   (geminiStructuredPayload.response_format as Record<string, unknown>).type,
   'json_schema'
@@ -669,7 +690,7 @@ try {
   );
   assert.strictEqual(defaultGeminiConfig.apiKey, '');
   assert.strictEqual(defaultGeminiConfig.apiUrl, GEMINI_OPENAI_API_URL);
-  assert.strictEqual(defaultGeminiConfig.model, 'gemini-3.6-flash');
+  assert.strictEqual(defaultGeminiConfig.model, 'gemini-3.7-flash');
 
   const liteGeminiConfig = resolveProviderConfig(
     createProviderConfigRequest(),
@@ -681,7 +702,7 @@ try {
     createProviderConfigRequest(),
     { provider: 'gemini', model: 'deepseek-v4-pro' }
   );
-  assert.strictEqual(invalidGeminiConfig.model, 'gemini-3.6-flash');
+  assert.strictEqual(invalidGeminiConfig.model, 'gemini-3.7-flash');
 
   process.env.GEMINI_API_KEY = 'gemini-key';
   process.env.GEMINI_API_URL = 'https://gemini.example/chat/completions';

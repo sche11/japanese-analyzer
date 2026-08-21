@@ -45,7 +45,7 @@
 - 句子解析：分词、假名、罗马音、词性标记和中文释义。
 - 单词详解：点击词汇查看读音、释义、语法角色和上下文解释。
 - 整句翻译：生成中文整句翻译，方便快速理解语境。
-- 图片识别：上传或粘贴图片提取日语文字。当前仅 Gemini 支持。
+- 图片识别：上传或粘贴图片提取日语文字；DeepSeek 使用独立视觉模型进行 OCR。
 - 朗读：支持 Edge TTS 和 Gemini TTS。
 - AI 日语助手：围绕日语语法、词汇、文化和当前句子提问。
 - 双模型服务商：文本模型支持 Gemini 和 DeepSeek，默认使用 DeepSeek。
@@ -59,8 +59,8 @@
 | 能力 | 默认模型 / 服务 | 说明 |
 | --- | --- | --- |
 | 文本解析 | `deepseek-v4-flash` / `deepseek-v4-pro` | 默认文本服务商是 DeepSeek，可在设置中切换 Flash / Pro；DeepSeek 请求默认关闭思考模式。 |
-| Gemini 文本解析 | `gemini-3.6-flash` / `gemini-3.5-flash-lite` | 可在设置中切换 Gemini Flash / Flash-Lite；Gemini 请求使用最低推理档。 |
-| 图片识别 | Gemini | DeepSeek 当前不支持图片识别，选择 DeepSeek 时图片上传和粘贴识别会关闭。 |
+| Gemini 文本解析 | `gemini-3.7-flash` / `gemini-3.5-flash-lite` | 可在设置中切换 Gemini Flash / Flash-Lite；3.7 Flash 使用 Low 推理档，Flash-Lite 使用 Minimal。 |
+| 图片识别 | `deepseek-v4-flash-vision-exp` / Gemini | 选择 DeepSeek 时，视觉实验模型只用于 OCR 且固定关闭思考；普通文字解析仍使用所选的 Flash / Pro。 |
 | 朗读 | Edge TTS / Gemini TTS | 默认使用 Edge TTS；Gemini TTS 需要 Gemini API Key。 |
 
 ## 快速开始
@@ -104,7 +104,7 @@ npm run dev
 
 | 变量 | 必填 | 用途 |
 | --- | --- | --- |
-| `DEEPSEEK_API_KEY` | 推荐 | DeepSeek API Key。默认文本服务商是 DeepSeek。 |
+| `DEEPSEEK_API_KEY` | 推荐 | DeepSeek API Key。用于默认文本解析及 DeepSeek 图片 OCR。 |
 | `DEEPSEEK_API_URL` | 可选 | DeepSeek OpenAI 兼容接口地址；留空使用官方默认地址。 |
 | `GEMINI_API_KEY` | 可选 | Gemini API Key。用于 Gemini 文本解析、图片识别和 Gemini TTS。 |
 | `GEMINI_API_URL` | 可选 | Gemini OpenAI 兼容接口地址；留空使用官方默认地址。 |
@@ -139,8 +139,8 @@ npm run dev
 
 通过环境变量注入,不要写进镜像:
 
-- `DEEPSEEK_API_KEY`:必填,默认文本解析用 DeepSeek(我会提供,或提示我填入)
-- `GEMINI_API_KEY`:可选,用于图片识别和 Gemini TTS,没有就跳过
+- `DEEPSEEK_API_KEY`:必填,默认文本解析及图片 OCR 用 DeepSeek(我会提供,或提示我填入)
+- `GEMINI_API_KEY`:可选,用于 Gemini 文本/图片识别和 Gemini TTS,没有就跳过
 - `CODE`:可选访问密码,留空即不启用
 - `DEEPSEEK_API_URL` / `GEMINI_API_URL`:留空使用官方默认地址即可
 
@@ -183,7 +183,7 @@ npm run dev
 1. Fork 或导入本仓库到 Vercel。
 2. 在 Vercel 项目的 `Settings -> Environment Variables` 中配置环境变量。
 3. 至少配置 `DEEPSEEK_API_KEY`，这样默认文本解析可以直接使用。
-4. 如需图片识别或 Gemini TTS，再配置 `GEMINI_API_KEY`。
+4. DeepSeek 图片 OCR 复用 `DEEPSEEK_API_KEY`；如需 Gemini 文本/图片识别或 Gemini TTS，再配置 `GEMINI_API_KEY`。
 5. 如需 Umami 统计，同时配置 `NEXT_PUBLIC_UMAMI_SRC` 和 `NEXT_PUBLIC_UMAMI_WEBSITE_ID`。
 6. 重新部署项目。
 
@@ -216,7 +216,7 @@ docker run -d \
 http://your-vps-ip:3002
 ```
 
-如果只使用 DeepSeek 文本解析，可以不填 `GEMINI_API_KEY`；如果不需要访问密码，可以保持 `CODE=""`。不需要自定义接口地址时，`DEEPSEEK_API_URL` 和 `GEMINI_API_URL` 也可以不用填，应用会使用默认地址。
+如果只使用 DeepSeek 文本解析和图片 OCR，可以不填 `GEMINI_API_KEY`；如果不需要访问密码，可以保持 `CODE=""`。不需要自定义接口地址时，`DEEPSEEK_API_URL` 和 `GEMINI_API_URL` 也可以不用填，应用会使用默认地址。
 
 如需启用 Umami，启动容器时额外加入：
 

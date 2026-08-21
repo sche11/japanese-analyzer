@@ -12,8 +12,10 @@ import { normalizeEscapedLineBreaks } from '../utils/markdown';
 
 export {
   DEFAULT_AI_PROVIDER,
+  DEEPSEEK_VISION_MODEL_NAME,
   DEEPSEEK_MODEL_OPTIONS,
   GEMINI_MODEL_OPTIONS,
+  getImageRecognitionModelName,
   getModelName,
   normalizeAIModel,
   normalizeAIProvider,
@@ -1287,10 +1289,6 @@ export async function extractTextFromImage(
   userApiKey?: string,
   provider: AIProvider = DEFAULT_AI_PROVIDER
 ): Promise<string> {
-  if (provider === 'deepseek') {
-    throw new Error('DeepSeek 当前不支持图片识别，请切换 Gemini 后重试。');
-  }
-
   try {
     const apiUrl = getApiEndpoint('/image-to-text');
     const headers = getHeaders(userApiKey);
@@ -1334,11 +1332,6 @@ export async function streamExtractTextFromImage(
   userApiKey?: string,
   provider: AIProvider = DEFAULT_AI_PROVIDER
 ): Promise<void> {
-  if (provider === 'deepseek') {
-    onError(new Error('DeepSeek 当前不支持图片识别，请切换 Gemini 后重试。'));
-    return;
-  }
-
   try {
     const apiUrl = getApiEndpoint('/image-to-text');
     const headers = getHeaders(userApiKey);

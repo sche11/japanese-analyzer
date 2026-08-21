@@ -315,12 +315,6 @@ export default function InputSection({
 
   // 处理图片识别的通用函数
   const processImageFile = async (file: File) => {
-    if (aiProvider === 'deepseek') {
-      setUploadStatus('DeepSeek 当前不支持图片识别，请切换 Gemini 后重试。');
-      setUploadStatusClass('mt-2 text-sm');
-      return;
-    }
-
     if (!file.type.startsWith('image/')) {
       setUploadStatus('请上传图片文件！');
       setUploadStatusClass('mt-2 text-sm');
@@ -336,7 +330,7 @@ export default function InputSection({
       const compressedImageData = await compressImage(file);
 
       // 优化提示词，明确不要换行符
-      const imageExtractionPrompt = "请提取并返回这张图片中的所有日文文字。提取的文本应保持原始格式，但不要输出换行符，用空格替代。不要添加任何解释或说明。";
+      const imageExtractionPrompt = "请只执行 OCR：提取并返回这张图片中的所有日文文字。保持原始文字与顺序，不要分析图片内容，不要输出换行符，用空格替代；不要添加解释、说明或 Markdown。";
 
       if (useStream) {
         // 使用流式API进行图片文字提取
@@ -400,12 +394,6 @@ export default function InputSection({
       if (item.type.startsWith('image/')) {
         // 阻止默认粘贴行为
         event.preventDefault();
-
-        if (aiProvider === 'deepseek') {
-          setUploadStatus('DeepSeek 当前不支持图片识别，请切换 Gemini 后重试。');
-          setUploadStatusClass('mt-2 text-sm');
-          break;
-        }
 
         const file = item.getAsFile();
         if (file) {
@@ -551,8 +539,8 @@ export default function InputSection({
               id="uploadImageButton"
               className="nd-icon-btn"
               onClick={() => document.getElementById('imageUploadInput')?.click()}
-              disabled={isImageUploading || aiProvider === 'deepseek'}
-              title={aiProvider === 'deepseek' ? 'DeepSeek 当前不支持图片识别，请切换 Gemini' : '上传图片提取文字'}
+              disabled={isImageUploading}
+              title="上传图片提取文字"
             >
               {isImageUploading
                 ? <span className="loading-spinner" style={{ width: 16, height: 16, margin: 0 }} />
@@ -735,7 +723,6 @@ export default function InputSection({
           id="imageUploadInput"
           accept="image/*"
           className="hidden"
-          disabled={aiProvider === 'deepseek'}
           onChange={handleImageUpload}
         />
       </section>

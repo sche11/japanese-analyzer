@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { proxyOpenAICompatibleRequest } from '../_utils/openaiProxy';
 import { ProviderConfigError, resolveProviderConfig, withProviderControls } from '../_utils/providerConfig';
 import { requireApiSession } from '../_utils/sessionAuth';
+import { getImageRecognitionModelName } from '../../lib/aiModels';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,13 +35,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (providerConfig.provider === 'deepseek') {
-      return NextResponse.json(
-        { error: { message: 'DeepSeek 当前不支持图片识别，请切换 Gemini 后重试。' } },
-        { status: 400 }
-      );
-    }
-
     if (!providerConfig.apiKey) {
       return NextResponse.json(
         { error: { message: '未提供API密钥，请在设置中配置API密钥或联系管理员配置服务器密钥' } },
@@ -56,11 +50,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 优化提示词，避免换行符
-    const defaultPrompt = "请提取并返回这张图片中的所有日文文字。提取的文本应保持原始格式，但不要输出换行符，用空格替代。不要添加任何解释或说明。";
+    const defaultPrompt = "请只执行 OCR：提取并返回这张图片中的所有日文文字。保持原始文字与顺序，不要分析图片内容，不要输出换行符，用空格替代；不要添加解释、说明或 Markdown。";
+    const imageModel = getImageRecognitionModelName(providerConfig.provider, providerConfig.model);
 
     // 构建发送到AI服务的请求
     const payload = withProviderControls(providerConfig.provider, {
-      model: providerConfig.model,
+      model: imageModel,
       stream: stream,
       messages: [
         {
@@ -76,7 +71,7 @@ export async function POST(req: NextRequest) {
           ]
         }
       ]
-    });
+    }, { enableThinking: false });
 
     const proxied = await proxyOpenAICompatibleRequest({
       url: providerConfig.apiUrl,

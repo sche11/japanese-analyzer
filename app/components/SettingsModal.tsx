@@ -156,7 +156,7 @@ export default function SettingsModal({
               >
                 !
               </span>
-              <span>DeepSeek 当前不支持图片识别；选择后上传图片和粘贴图片识别会自动关闭。</span>
+              <span>选择 DeepSeek 时，文字解析继续使用上方所选模型；图片 OCR 会单独使用 deepseek-v4-flash-vision-exp，并固定关闭思考模式。</span>
             </p>
           )}
         </div>

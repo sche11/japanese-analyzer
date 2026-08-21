@@ -172,6 +172,6 @@ export function withProviderControls(
   return {
     ...payload,
     ...responseFormat,
-    reasoning_effort: 'minimal',
+    reasoning_effort: payload.model === 'gemini-3.7-flash' ? 'low' : 'minimal',
   };
 }
