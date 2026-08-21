@@ -757,10 +757,11 @@ assert.deepStrictEqual(migratedSettings, {
   aiModel: 'deepseek-v4-pro',
   geminiApiKey: 'legacy-gemini-key',
   deepseekApiKey: 'deepseek-key',
-  deepseekThinkingEnabled: true,
+  deepseekThinkingEnabled: false,
 });
 assert.strictEqual(migratedStorage.getItem('geminiApiKey'), 'legacy-gemini-key');
 assert.strictEqual(migratedStorage.getItem('geminiApiUrl'), null);
+assert.strictEqual(migratedStorage.getItem('deepseekThinkingEnabled'), 'false');
 
 const defaultStorage = new MemoryStorage({
   aiProvider: 'unknown',

@@ -117,13 +117,16 @@ export function loadAISettingsFromStorage(storage: StorageLike): StoredAISetting
   }
 
   const aiProvider = normalizeAIProvider(storage.getItem('aiProvider'));
+  if (storage.getItem('deepseekThinkingEnabled') === 'true') {
+    storage.setItem('deepseekThinkingEnabled', 'false');
+  }
 
   return {
     aiProvider,
     aiModel: normalizeAIModel(aiProvider, storage.getItem('aiModel')),
     geminiApiKey: geminiApiKey || '',
     deepseekApiKey: storage.getItem('deepseekApiKey') || '',
-    deepseekThinkingEnabled: storage.getItem('deepseekThinkingEnabled') === 'true',
+    deepseekThinkingEnabled: false,
   };
 }
 

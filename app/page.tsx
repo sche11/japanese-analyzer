@@ -630,7 +630,6 @@ export default function Home() {
           aiModel={aiModel}
           geminiApiKey={geminiApiKey}
           deepseekApiKey={deepseekApiKey}
-          deepseekThinkingEnabled={deepseekThinkingEnabled}
           useStream={useStream}
           onSaveSettings={handleSaveSettings}
           isModalOpen={isSettingsModalOpen}

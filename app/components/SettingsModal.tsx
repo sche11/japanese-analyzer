@@ -19,7 +19,6 @@ interface SettingsModalProps {
   aiModel: AIModelName;
   geminiApiKey: string;
   deepseekApiKey: string;
-  deepseekThinkingEnabled: boolean;
   useStream: boolean;
   onSaveSettings: (settings: SettingsPayload) => void;
   isModalOpen: boolean;
@@ -31,7 +30,6 @@ export default function SettingsModal({
   aiModel,
   geminiApiKey,
   deepseekApiKey,
-  deepseekThinkingEnabled,
   useStream,
   onSaveSettings,
   isModalOpen,
@@ -41,7 +39,6 @@ export default function SettingsModal({
   const [selectedModel, setSelectedModel] = useState<AIModelName>(getModelName(aiProvider, aiModel));
   const [geminiKey, setGeminiKey] = useState(geminiApiKey);
   const [deepseekKey, setDeepseekKey] = useState(deepseekApiKey);
-  const [thinkingEnabled, setThinkingEnabled] = useState(deepseekThinkingEnabled);
   const [streamEnabled, setStreamEnabled] = useState(useStream);
   const [status, setStatus] = useState('');
 
@@ -50,9 +47,8 @@ export default function SettingsModal({
     setSelectedModel(getModelName(aiProvider, aiModel));
     setGeminiKey(geminiApiKey);
     setDeepseekKey(deepseekApiKey);
-    setThinkingEnabled(deepseekThinkingEnabled);
     setStreamEnabled(useStream);
-  }, [aiProvider, aiModel, geminiApiKey, deepseekApiKey, deepseekThinkingEnabled, useStream]);
+  }, [aiProvider, aiModel, geminiApiKey, deepseekApiKey, useStream]);
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -78,7 +74,7 @@ export default function SettingsModal({
       aiModel: currentModelName,
       geminiApiKey: geminiKey.trim(),
       deepseekApiKey: deepseekKey.trim(),
-      deepseekThinkingEnabled: thinkingEnabled,
+      deepseekThinkingEnabled: false,
       useStream: streamEnabled,
     });
 
@@ -141,24 +137,6 @@ export default function SettingsModal({
               );
             })}
           </div>
-          {selectedProvider === 'deepseek' && (
-            <p
-              className="mt-2 flex items-start gap-2 rounded-[10px] p-2 text-xs leading-5"
-              style={{
-                background: 'color-mix(in oklab, var(--pos-adj) 12%, transparent)',
-                color: 'var(--ink-2)',
-              }}
-            >
-              <span
-                className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[11px] font-bold leading-none"
-                style={{ background: 'var(--pos-adj)', color: '#fff' }}
-                aria-hidden="true"
-              >
-                !
-              </span>
-              <span>选择 DeepSeek 时，文字解析继续使用上方所选模型；图片 OCR 会单独使用 deepseek-v4-flash-vision-exp，并固定关闭思考模式。</span>
-            </p>
-          )}
         </div>
 
         <div className="mb-4">
@@ -225,15 +203,15 @@ export default function SettingsModal({
                   启用深度思考
                 </label>
                 <p className="m-0 mt-1 text-xs leading-5" style={{ color: 'var(--ink-3)' }}>
-                  句子解析时使用 High 强度；开启流式输出可实时查看思考全文。
+                  当前固定关闭，暂不可选择。
                 </p>
               </div>
               <button
                 id="deepseekThinkingToggle"
                 type="button"
                 className="nd-toggle"
-                aria-pressed={thinkingEnabled}
-                onClick={() => setThinkingEnabled(!thinkingEnabled)}
+                aria-pressed={false}
+                disabled
               >
                 <span className="nd-toggle-knob" />
               </button>
